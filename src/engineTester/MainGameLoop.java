@@ -8,6 +8,7 @@ import guis.GuiRenderer;
 import guis.GuiTexture;
 import models.TexturedModel;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -18,6 +19,7 @@ import terrains.Terrain;
 import textures.ModelTexture;
 import textures.TerrainTexture;
 import textures.TerrainTexturePack;
+import toolbox.MousePicker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,8 @@ public class MainGameLoop {
         Light light = new Light(new Vector3f(20000,20000,20000), new Vector3f(1,1,1));
         List<Light> lights = new ArrayList<>();
         lights.add(light);
-        lights.add(new Light(new Vector3f(109,10,-70), new Vector3f(2,0,0), new Vector3f(1, 0.01f, 0.002f)));
+        Light light2 = new Light(new Vector3f(109,10,-70), new Vector3f(2,0,0), new Vector3f(1, 0.01f, 0.002f));
+        lights.add(light2);
 
 
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("grass"));
@@ -68,7 +71,8 @@ public class MainGameLoop {
         TexturedModel lamp = new TexturedModel(OBJLoader.loadObjModel("lamp", loader), new ModelTexture(loader.loadTexture("lamp")));
         lamp.getTexture().setHasTransparency(true);
         lamp.getTexture().setUseFakeLighting(true);
-        entities.add(new Entity(lamp, new Vector3f(109,terrain.getHeightOfTerrain(109, -70),-70), 0, 0, 0, 1));
+        Entity lampEntity = new Entity(lamp, new Vector3f(109,terrain.getHeightOfTerrain(109, -70),-70), 0, 0, 0, 1);
+        entities.add(lampEntity);
 
         TexturedModel tree = new TexturedModel(OBJLoader.loadObjModel("tree", loader), new ModelTexture(loader.loadTexture("tree")));
         TexturedModel grass = new TexturedModel(OBJLoader.loadObjModel("grassModel", loader), new ModelTexture(loader.loadTexture("grassModel")));
@@ -116,11 +120,20 @@ public class MainGameLoop {
 
         GuiRenderer guiRenderer = new GuiRenderer(loader);
 
+        MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix(), terrain);
+
         while(!Display.isCloseRequested()) {
             entity.increaseRotation(0,1,0);
             camera.move();
             player.move(terrain, Keyboard.KEY_W, Keyboard.KEY_S, Keyboard.KEY_A, Keyboard.KEY_D, Keyboard.KEY_SPACE);
             player2.move(terrain, Keyboard.KEY_UP, Keyboard.KEY_DOWN, Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_NUMPAD0);
+
+            picker.update();
+            Vector3f terrainPoint = picker.getCurrentTerrainPoint();
+            if(terrainPoint != null && Mouse.isButtonDown(0)) {
+                lampEntity.setPosition(terrainPoint);
+                light2.setPosition(new Vector3f(terrainPoint.x, terrainPoint.y + 15, terrainPoint.z));
+            }
 
             //game logic
             renderer.processEntity(player);
