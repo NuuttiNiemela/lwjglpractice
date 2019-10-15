@@ -24,8 +24,8 @@ public class Player extends Entity {
         super(model, position, rotX, rotY, rotZ, scale);
     }
 
-    public void move(Terrain terrain) {
-        checkInputs();
+    public void move(Terrain terrain, int forward, int backward, int turnLeft, int turnRight, int jump) {
+        checkInputs(forward, backward, turnLeft, turnRight, jump);
         super.increaseRotation(0, currentTurnSpeed * DisplayManager.getFrameTimeSeconds(), 0);
         float distance = currentSpeed * DisplayManager.getFrameTimeSeconds();
         float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
@@ -49,24 +49,24 @@ public class Player extends Entity {
         }
     }
 
-    private void checkInputs() {
-        if(Keyboard.isKeyDown(Keyboard.KEY_W)) {
+    private void checkInputs(int forward, int backward, int turnLeft, int turnRight, int jump) {
+        if(Keyboard.isKeyDown(forward)) {
             this.currentSpeed = RUN_SPEED;
-        } else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+        } else if (Keyboard.isKeyDown(backward)) {
             this.currentSpeed = -RUN_SPEED;
         } else {
             this.currentSpeed = 0;
         }
 
-        if(Keyboard.isKeyDown(Keyboard.KEY_D)) {
+        if(Keyboard.isKeyDown(turnRight)) {
             this.currentTurnSpeed = -TURN_SPEED;
-        } else if(Keyboard.isKeyDown(Keyboard.KEY_A)) {
+        } else if(Keyboard.isKeyDown(turnLeft)) {
             this.currentTurnSpeed = TURN_SPEED;
         } else {
             this.currentTurnSpeed = 0;
         }
 
-        if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+        if(Keyboard.isKeyDown(jump)) {
             jump();
         }
 

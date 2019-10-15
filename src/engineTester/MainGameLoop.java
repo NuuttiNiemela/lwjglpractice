@@ -7,6 +7,7 @@ import entities.Player;
 import guis.GuiRenderer;
 import guis.GuiTexture;
 import models.TexturedModel;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
@@ -28,7 +29,7 @@ public class MainGameLoop {
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
-        MasterRenderer renderer = new MasterRenderer();
+        MasterRenderer renderer = new MasterRenderer(loader);
         List<Entity> entities = new ArrayList<>();
 
 
@@ -57,7 +58,9 @@ public class MainGameLoop {
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blendMap"));
 
         Terrain terrain = new Terrain(0, -1, loader, texturePack, blendMap, "heightmap");
-//        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "heightmap");
+        Terrain terrain2 = new Terrain(-1, -1, loader, texturePack, blendMap, "heightmap2");
+        Terrain terrain3 = new Terrain(0, 0, loader, texturePack, blendMap, "heightmap2");
+        Terrain terrain4 = new Terrain(-1, 0, loader, texturePack, blendMap, "heightmap2");
 
         Entity entity = new Entity(texturedModel, new Vector3f(65,terrain.getHeightOfTerrain(65, -25),-25),0,0,0,1);
         Entity entity2 = new Entity(texturedModel2, new Vector3f(95,terrain.getHeightOfTerrain(95, -50),-50),0,120,0,1);
@@ -98,10 +101,12 @@ public class MainGameLoop {
         }
 
         RawModel bunnyModel = OBJLoader.loadObjModel("person", loader);
-//        RawModel bunnyModel = OBJLoader.loadObjModel("stanfordBunny", loader);
+        RawModel bunnyModel2 = OBJLoader.loadObjModel("stanfordBunny", loader);
         TexturedModel stanfordBunny = new TexturedModel(bunnyModel, new ModelTexture(loader.loadTexture("playerTexture")));
+        TexturedModel stanfordBunny2 = new TexturedModel(bunnyModel2, new ModelTexture(loader.loadTexture("blank")));
 
         Player player = new Player(stanfordBunny, new Vector3f(75, 0, -5), 0, 180, 0, 0.5f);
+        Player player2 = new Player(stanfordBunny2, new Vector3f(80, 0, -5), 0, 180, 0, 1);
 
         Camera camera = new Camera(player);
 
@@ -114,12 +119,16 @@ public class MainGameLoop {
         while(!Display.isCloseRequested()) {
             entity.increaseRotation(0,1,0);
             camera.move();
-            player.move(terrain);
+            player.move(terrain, Keyboard.KEY_W, Keyboard.KEY_S, Keyboard.KEY_A, Keyboard.KEY_D, Keyboard.KEY_SPACE);
+            player2.move(terrain, Keyboard.KEY_UP, Keyboard.KEY_DOWN, Keyboard.KEY_LEFT, Keyboard.KEY_RIGHT, Keyboard.KEY_NUMPAD0);
 
             //game logic
             renderer.processEntity(player);
+            renderer.processEntity(player2);
             renderer.processTerrain(terrain);
-//            renderer.processTerrain(terrain2);
+            renderer.processTerrain(terrain2);
+            renderer.processTerrain(terrain3);
+            renderer.processTerrain(terrain4);
 
             fullEntity(loader, renderer, "lowPolyTree", "lowPolyTree", -5, 0, -50, 0, 0, 0, 5, 1, 1);
 
