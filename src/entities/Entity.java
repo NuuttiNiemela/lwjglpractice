@@ -69,11 +69,11 @@ public class Entity {
         this.position = position;
     }
 
-    public float getRoX() {
+    public float getRotX() {
         return rotX;
     }
 
-    public void setRoX(float rotX) {
+    public void setRotX(float rotX) {
         this.rotX = rotX;
     }
 

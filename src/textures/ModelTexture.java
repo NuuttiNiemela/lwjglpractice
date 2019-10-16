@@ -3,6 +3,7 @@ package textures;
 public class ModelTexture {
 
     private int textureID;
+    private int normalMap;
 
     private float shineDamper = 1;
     private float reflectivity = 0;
@@ -22,6 +23,14 @@ public class ModelTexture {
 
     public void setNumberOfRows(int numberOfRows) {
         this.numberOfRows = numberOfRows;
+    }
+
+    public int getNormalMap() {
+        return normalMap;
+    }
+
+    public void setNormalMap(int normalMap) {
+        this.normalMap = normalMap;
     }
 
     public int getTextureID() {

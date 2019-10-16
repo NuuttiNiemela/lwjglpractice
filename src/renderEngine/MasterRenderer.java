@@ -4,6 +4,7 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import models.TexturedModel;
+import normalMappingRenderer.NormalMappingRenderer;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
@@ -23,9 +24,9 @@ public class MasterRenderer {
     private static final float NEAR_PLANE = 0.1f;
     private static final float FAR_PLANE = 1000;
 
-    private static final float RED = 0.5444f;
-    private static final float GREEN = 0.62f;
-    private static final float BLUE = 0.69f;
+    public static final float RED = 0.5444f;
+    public static final float GREEN = 0.62f;
+    public static final float BLUE = 0.69f;
 
     private Matrix4f projectionMatrix;
 
@@ -35,7 +36,10 @@ public class MasterRenderer {
     private TerrainRenderer terrainRenderer;
     private TerrainShader terrainShader = new TerrainShader();
 
+    private NormalMappingRenderer normalMappingRenderer;
+
     private Map<TexturedModel, List<Entity>> entities = new HashMap<>();
+    private Map<TexturedModel, List<Entity>> normalMapEntities = new HashMap<>();
     private List<Terrain> terrains = new ArrayList<>();
 
     private SkyboxRenderer skyboxRenderer;
@@ -46,6 +50,7 @@ public class MasterRenderer {
         renderer = new EntityRenderer(shader, projectionMatrix);
         terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
         skyboxRenderer = new SkyboxRenderer(loader, projectionMatrix);
+        normalMappingRenderer = new NormalMappingRenderer(projectionMatrix);
     }
 
     public Matrix4f getProjectionMatrix() {
@@ -69,6 +74,7 @@ public class MasterRenderer {
         shader.loadViewMatrix(camera);
         renderer.render(entities);
         shader.stop();
+        normalMappingRenderer.render(normalMapEntities, lights, camera);
         terrainShader.start();
         terrainShader.loadSkyColour(RED, GREEN, BLUE);
         terrainShader.loadLights(lights);
@@ -78,6 +84,7 @@ public class MasterRenderer {
         skyboxRenderer.render(camera, RED, GREEN, BLUE);
         terrains.clear();
         entities.clear();
+        normalMapEntities.clear();
     }
 
     public void processTerrain(Terrain terrain) {
@@ -96,6 +103,18 @@ public class MasterRenderer {
         }
     }
 
+    public void processNormalMapEntity(Entity entity) {
+        TexturedModel entityModel = entity.getModel();
+        List<Entity> batch = normalMapEntities.get(entityModel);
+        if(batch != null) {
+            batch.add(entity);
+        } else {
+            List<Entity> newBatch = new ArrayList<>();
+            newBatch.add(entity);
+            normalMapEntities.put(entityModel, newBatch);
+        }
+    }
+
     public void prepare() {
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT|GL11.GL_DEPTH_BUFFER_BIT);
@@ -105,6 +124,7 @@ public class MasterRenderer {
     public void cleanUp() {
         shader.cleanUp();
         terrainShader.cleanUp();
+        normalMappingRenderer.cleanUp();
     }
 
     private void createProjectionMatrix() {

@@ -61,7 +61,7 @@ public class EntityRenderer {
     }
 
     private void prepareInstance(Entity entity) {
-        Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRoX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+        Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
         shader.loadTransformationMatrix(transformationMatrix);
         shader.loadOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
     }

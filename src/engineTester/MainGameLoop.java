@@ -4,9 +4,13 @@ import entities.Camera;
 import entities.Entity;
 import entities.Light;
 import entities.Player;
+import fontMeshCreator.FontType;
+import fontMeshCreator.GUIText;
+import fontRendering.TextMaster;
 import guis.GuiRenderer;
 import guis.GuiTexture;
 import models.TexturedModel;
+import normalMappingObjConverter.NormalMappedObjLoader;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -21,6 +25,7 @@ import textures.TerrainTexture;
 import textures.TerrainTexturePack;
 import toolbox.MousePicker;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -31,9 +36,16 @@ public class MainGameLoop {
 
         DisplayManager.createDisplay();
         Loader loader = new Loader();
+        TextMaster.init(loader);
+
         MasterRenderer renderer = new MasterRenderer(loader);
         List<Entity> entities = new ArrayList<>();
+        List<Entity> normalEntities = new ArrayList<>();
 
+
+        FontType font = new FontType(loader.loadTexture("arial"), new File("res/arial.fnt"));
+        GUIText text = new GUIText("Jabadaba duu!", 1, font, new Vector2f(0, 0.95f), 1f, true);
+        text.setColour(0,1,0);
 
 
         RawModel model = OBJLoader.loadObjModel("dragon", loader);
@@ -83,6 +95,11 @@ public class MainGameLoop {
         TexturedModel fern = new TexturedModel(OBJLoader.loadObjModel("fern", loader), fernAtlas);
         fern.getTexture().setHasTransparency(true);
 
+        TexturedModel barrel = new TexturedModel(NormalMappedObjLoader.loadOBJ("barrel", loader), new ModelTexture(loader.loadTexture("barrel")));
+        barrel.getTexture().setNormalMap(loader.loadTexture("barrelNormal"));
+        barrel.getTexture().setShineDamper(10);
+        barrel.getTexture().setReflectivity(0.5f);
+
         Random random = new Random();
         for(int i=0;i<500;i++){
             if (i % 2 == 0) {
@@ -101,6 +118,12 @@ public class MainGameLoop {
                 z = random.nextFloat() * -600;
                 y = terrain.getHeightOfTerrain(x, z);
                 entities.add(new Entity(grass, new Vector3f(x, y, z), 0, 0, 0, 1));
+            }
+            if (i % 50 == 0) {
+                float x = random.nextFloat() * 800 - 400;
+                float z = random.nextFloat() * -600;
+                float y = terrain.getHeightOfTerrain(x, z) + 2.5f;
+                normalEntities.add(new Entity(barrel, new Vector3f(x, y, z), 0, 0, 0, 0.4f));
             }
         }
 
@@ -149,14 +172,20 @@ public class MainGameLoop {
                 renderer.processEntity(trees);
             }
 
+            for(Entity fancyEntities : normalEntities) {
+                renderer.processNormalMapEntity(fancyEntities);
+            }
+
             renderer.processEntity(entity);
             renderer.processEntity(entity2);
             renderer.render(lights, camera);
             guiRenderer.render(guis);
+            TextMaster.render();
             DisplayManager.updateDisplay();
 
         }
 
+        TextMaster.cleanUp();
         guiRenderer.cleanUp();
         renderer.cleanUp();
         loader.cleanUp();
