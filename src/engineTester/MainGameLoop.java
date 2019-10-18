@@ -1,5 +1,6 @@
 package engineTester;
 
+import collision.AABB;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
@@ -42,6 +43,14 @@ public class MainGameLoop {
         List<Entity> entities = new ArrayList<>();
         List<Entity> normalEntities = new ArrayList<>();
 
+        AABB box = new AABB(new Vector3f(0,0,0), new Vector3f(1,1,1));
+        AABB box2 = new AABB(new Vector3f(1,0,0), new Vector3f(1,1,1));
+
+//        if(box.getCollision(box2)) {
+//            System.out.println("intersect");
+//        } else {
+//            System.out.println("not intersecting");
+//        }
 
         FontType font = new FontType(loader.loadTexture("arial"), new File("res/arial.fnt"));
         GUIText text = new GUIText("Jabadaba duu!", 1, font, new Vector2f(0, 0.95f), 1f, true);
@@ -156,6 +165,7 @@ public class MainGameLoop {
             if(terrainPoint != null && Mouse.isButtonDown(0)) {
                 lampEntity.setPosition(terrainPoint);
                 light2.setPosition(new Vector3f(terrainPoint.x, terrainPoint.y + 15, terrainPoint.z));
+
             }
 
             //game logic
